@@ -158,8 +158,8 @@ private struct AlbumImageViewer: View {
     }
 
     var body: some View {
-        let buttonFillColor = colorScheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.06)
-        let secondaryTextColor = colorScheme == .dark ? Color.white.opacity(0.82) : Color.black.opacity(0.72)
+        // 主按钮维持品牌蓝色（Album 一级页面历史上就是固定蓝色），次按钮跟随它对齐尺寸。
+        let primaryTint = Color(red: 0.0, green: 0.48, blue: 1.0)
 
         NavigationStack {
             ZStack {
@@ -186,23 +186,22 @@ private struct AlbumImageViewer: View {
                             action: transferSelectedAlbumDirectly,
                             height: 38,
                             fontSize: 14,
-                            tint: Color(red: 0.0, green: 0.48, blue: 1.0)
+                            tint: primaryTint
                         )
-                        .frame(minWidth: 160)
+                        .frame(maxWidth: 220)
 
-                        Button(action: openManualAdjustment) {
-                            Text("手动调整")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(secondaryTextColor)
-                                .padding(.horizontal, 16)
-                                .frame(height: 36)
-                                .background(
-                                    Capsule(style: .continuous)
-                                        .fill(buttonFillColor.opacity(0.72))
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(isTransferInProgress)
+                        // 次操作：与主按钮共享胶囊形状/高度/字号，使用淡 tint 填充，
+                        // 模仿 iOS 26 “tinted capsule” 次按钮，避免风格割裂。
+                        TransferSecondaryButton(
+                            title: "手动调整",
+                            systemImage: "slider.horizontal.3",
+                            isEnabled: !isTransferInProgress,
+                            action: openManualAdjustment,
+                            height: 38,
+                            fontSize: 14,
+                            tint: .secondary
+                        )
+                        .frame(maxWidth: 220)
                     }
                     .padding(.bottom, 10)
                     .offset(y: 20)

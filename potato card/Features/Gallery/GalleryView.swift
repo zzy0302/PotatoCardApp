@@ -288,19 +288,21 @@ private struct GalleryImageViewer: View {
                             isEnabled: activeDevice != nil,
                             action: transferSelectedPhotoDirectly
                         )
-                        .frame(minWidth: 180)
+                        .frame(maxWidth: 280)
 
-                        // 次操作：使用系统 bordered + capsule。当照片有非默认调整时把 tint 设为
-                        // .yellow（系统强调色之一，自动适配暗色模式），保留“黄色提示”语义。
-                        Button(action: openManualAdjustment) {
-                            Label("手动调整", systemImage: "slider.horizontal.3")
-                                .frame(minWidth: 100)
-                        }
-                        .buttonStyle(.bordered)
-                        .buttonBorderShape(.capsule)
-                        .controlSize(.regular)
-                        .tint(currentPhotoIsCustomized ? .yellow : .secondary)
-                        .disabled(isTransferInProgress)
+                        // 次操作：使用同形状的 TransferSecondaryButton，与主按钮的胶囊形状、
+                        // 字号、高度、内边距保持一致，避免一大一小的割裂感。
+                        // 当照片有非默认调整时把 tint 改成 .yellow + highlighted，
+                        // 仍然保留“黄色提示”语义。
+                        TransferSecondaryButton(
+                            title: "手动调整",
+                            systemImage: "slider.horizontal.3",
+                            isEnabled: !isTransferInProgress,
+                            action: openManualAdjustment,
+                            tint: currentPhotoIsCustomized ? .yellow : .secondary,
+                            highlighted: currentPhotoIsCustomized
+                        )
+                        .frame(maxWidth: 280)
                     }
                     .padding(.bottom, 10)
                     .offset(y: 20)

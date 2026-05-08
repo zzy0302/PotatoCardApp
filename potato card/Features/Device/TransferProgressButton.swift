@@ -91,6 +91,58 @@ struct TransferProgressButton: View {
     }
 }
 
+/// 与 `TransferProgressButton` 配对的次操作按钮：使用相同的胶囊形状、字号与高度，
+/// 视觉上模仿 iOS 26 “tinted capsule” —— 半透明 tint 填充 + 同色文字 + 同色描边，
+/// 这样和主按钮放在一起时尺寸/形状/节奏完全统一，不会出现一大一小、深浅不一的割裂感。
+struct TransferSecondaryButton: View {
+    /// 按钮文案。
+    let title: String
+    /// 可选的 SF Symbol 图标名。
+    var systemImage: String? = nil
+    /// 是否允许点击。
+    let isEnabled: Bool
+    /// 点击回调。
+    let action: () -> Void
+
+    /// 整体高度。默认与主按钮 `TransferProgressButton.height` 对齐。
+    var height: CGFloat = 50
+    /// 字号。
+    var fontSize: CGFloat = 16
+    /// 文案 / 描边 / 填充共用的强调色。
+    var tint: Color = .secondary
+    /// 高亮态：背景填充更深，类似 iOS 系统“tinted button”的强调态。
+    /// 在“已保存手动调整”这类需要提示的场景下打开，配合 `tint = .yellow`。
+    var highlighted: Bool = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                        .font(.system(size: fontSize, weight: .semibold))
+                }
+                Text(title)
+                    .font(.system(size: fontSize, weight: .semibold))
+            }
+            .foregroundStyle(tint)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(height: height)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(tint.opacity(highlighted ? 0.28 : 0.14))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(tint.opacity(highlighted ? 0.55 : 0.0), lineWidth: 1)
+            )
+            .clipShape(Capsule(style: .continuous))
+            .contentShape(Capsule(style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+    }
+}
+
 #if DEBUG
 #Preview("Idle") {
     TransferProgressButton(
@@ -125,6 +177,48 @@ struct TransferProgressButton: View {
         isEnabled: false,
         action: {}
     )
+    .padding()
+}
+
+#Preview("Pair: primary + secondary") {
+    VStack(spacing: 12) {
+        TransferProgressButton(
+            idleTitle: "传输到设备",
+            inProgressTitle: "传输中",
+            progress: 0,
+            isInProgress: false,
+            isEnabled: true,
+            action: {}
+        )
+        TransferSecondaryButton(
+            title: "手动调整",
+            systemImage: "slider.horizontal.3",
+            isEnabled: true,
+            action: {}
+        )
+    }
+    .padding()
+}
+
+#Preview("Pair: in-progress + customized") {
+    VStack(spacing: 12) {
+        TransferProgressButton(
+            idleTitle: "传输到设备",
+            inProgressTitle: "传输中",
+            progress: 0.6,
+            isInProgress: true,
+            isEnabled: true,
+            action: {}
+        )
+        TransferSecondaryButton(
+            title: "手动调整",
+            systemImage: "slider.horizontal.3",
+            isEnabled: false,
+            action: {},
+            tint: .yellow,
+            highlighted: true
+        )
+    }
     .padding()
 }
 #endif
